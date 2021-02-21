@@ -88,8 +88,35 @@ jobs:
             npm install
             npm install oauth
             yarn run test -w 1
-      
-                
+
+  scan-frontend:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - restore_cache:
+          key: frontend-build
+      - run:
+          name: frontend-audit
+          command: |
+             cd frontend
+             npm update
+             npm audit fix
+
+  scan-backend:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - restore_cache:
+          key: backend-build
+      - run:
+          name: frontend-audit
+          command: |
+             cd frontend
+             npm update
+             npm audit fix
+                     
   test-backend:
     docker:
       - image: circleci/node:13.8.0
@@ -113,3 +140,7 @@ workflows:
           requires: [build-frontend]
       - test-backend:
           requires: [build-backend]
+      - scan-backend:
+          requires: [build-backend]
+      - scan-frontend:
+          requires: [build-frontend]
