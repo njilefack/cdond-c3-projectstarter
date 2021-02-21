@@ -80,11 +80,12 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-         key: frontend-build-$(CIRCLE_WORKFLOW_ID)
+         key: frontend-build
       - run:
           name: Front-end-Test
           command: |
             cd frontend
+            npm install
             npm run test
       
                 
@@ -94,11 +95,12 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-         key: backend-build-$(CIRCLE_WORKFLOW_ID)
+         key: backend-build
       - run:
          name: Back-end-Test
          command: |
            cd backend
+           npm install
            npm run test
 
 workflows:
