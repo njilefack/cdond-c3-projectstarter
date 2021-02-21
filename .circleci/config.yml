@@ -48,8 +48,10 @@ jobs:
             cd dist
             ls
       - save_cache:
-          paths: [frontend/node_modules]
-          key: frontend-build
+          paths: 
+            - frontend/node_modules
+            - frontend/dist
+          key: frontend-build-${CIRCLE_WORKFLOW_ID}
 
   build-backend:
     docker:
@@ -67,8 +69,10 @@ jobs:
              cd dist
              ls
       - save_cache:
-          paths: [backend/node_modules]
-          key: backend-build
+          paths: 
+            - backend/node_modules
+            - backend/dist
+          key: backend-build-${CIRCLE_WORKFLOW_ID}
 
   test-frontend:
     docker:
@@ -76,7 +80,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-         key: frontend-build
+         key: frontend-build-$(CIRCLE_WORKFLOW_ID)
       - run:
           name: Front-end-Test
           command: |
@@ -91,7 +95,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-         key: backend-build
+         key: backend-build-$(CIRCLE_WORKFLOW_ID)
       - run:
          name: Back-end-Test
          command: |
