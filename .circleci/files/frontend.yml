@@ -7,7 +7,7 @@ Parameters:
     Type: String
 
 Resources:
-  websitebucket-jilef:
+  websitebucketjilef2021:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Sub "udapeople-${ID}"
@@ -19,16 +19,16 @@ Resources:
   WebsiteBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
-      Bucket: !Ref 'websitebucket-jilef'
+      Bucket: !Ref 'websitebucketjilef2021'
       PolicyDocument:
         Statement:
         - Sid: PublicReadForGetBucketObjects
           Effect: Allow
           Principal: '*'
           Action: s3:GetObject
-          Resource: !Join ['', ['arn:aws:s3:::', !Ref 'websitebucket-jilef', /*]]
+          Resource: !Join ['', ['arn:aws:s3:::', !Ref 'websitebucketjilef2021', /*]]
 
 Outputs:
   WebsiteURL:
-    Value: !GetAtt websitebucket-jilef.WebsiteURL
+    Value: !GetAtt websitebucketjilef2021.WebsiteURL
     Description: URL for website hosted on S3
