@@ -1,5 +1,8 @@
 version: 2.1
 
+orbs:
+  jira: circleci/jira@1.3.1
+
 commands:
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
@@ -169,7 +172,7 @@ jobs:
                -H "token: ${CIRCLE_WORKFLOW_ID}" \
                --request PUT \
                --data ${INSTANCE_IP} \
-               https://api.memstash.io/values/instance_ip
+               --https://api.memstash.io/values/instance_ip
 
       - run: sudo cat .circleci/ansible/inventory.txt
       - persist_to_workspace:
