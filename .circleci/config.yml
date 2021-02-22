@@ -161,7 +161,7 @@ jobs:
           command: |
             INSTANCE_IP=$(aws ec2 describe-instances \
             --filters 'Name=tag,Values=backend-*' \
-            --quey 'Reservations[*].Instances[*].PublicIpAddress' \
+            --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --output text >> .circleci/ansible/inventory.txt)
 
             echo ${INSTANCE_IP}
