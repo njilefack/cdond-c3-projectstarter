@@ -88,6 +88,20 @@ jobs:
             npm install
             npm install oauth
             yarn run test -w 1
+                     
+  test-backend:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - restore_cache:
+         key: backend-build
+      - run:
+         name: Back-end-Test
+         command: |
+           cd backend
+           npm install
+           npm run test
 
   scan-frontend:
     docker:
@@ -116,20 +130,56 @@ jobs:
              cd frontend
              npm update
              npm audit fix
-                     
-  test-backend:
+
+# Infrastructure Setup for FrontEnd and BackEnd
+  deploy-infrastructure:
     docker:
-      - image: circleci/node:13.8.0
+      - image: amazon/aws-cli
     steps:
       - checkout
-      - restore_cache:
-         key: backend-build
       - run:
-         name: Back-end-Test
-         command: |
-           cd backend
-           npm install
-           npm run test
+          name: Ensure back-end infrastructure exists
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/backend.yml \
+              --tags project=BackEnd-Server-${CIRCLE_WORKFLOW_ID} \
+              --stack-name backend-stack-${CIRCLE_WORKFLOW_ID} \
+              --parameter-overrides ID=${CIRCLE_WORKFLOW_ID}  
+
+      - run:
+          name: Ensure front-end infrastructure exist
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/frontend.yml \
+              --tags project=FrontEnd-Server-${CIRCLE_WORKFLOW_ID} \
+              --stack-name frontend-stack-${CIRCLE_WORKFLOW_ID} \
+              --parameter-overrides ID=${CIRCLE_WORKFLOW_ID}  
+
+# This will add back-end servers IPs to ansible inventory file
+      - run:
+          name: Add back-end ip to ansible inventory
+          command: |
+            INSTANCE_IP=$(aws ec2 describe-instances \
+            --filters 'Name=tag,Values=backend-*' \
+            --quey "Reservations[*].Instances[*].PublicIpAddress" \
+            --output txt >> .circleci/ansible/inventory.txt)
+
+            echo ${INSTANCE_IP}
+            curl -H "Content-Type: text/plain" \
+               -H "token: ${CIRCLE_WORKFLOW_ID}" \
+               --request PUT \
+               --data ${INSTANCE_IP} \
+               https://api.memstash.io/values/instance_ip
+
+      - run: sudo cat .circleci/ansible/inventory.txt
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - cdond-c3-projectstarter/.circleci/ansible/inventory.txt
+      # Here's where you will add some code to rollback on failure   
+      - destroy-environment:
+          workflow_id: "${CIRCLE_WORKFLOW_ID}"
+      - revert-migrations 
 
 workflows:
   default:
@@ -144,3 +194,8 @@ workflows:
           requires: [build-backend]
       - scan-frontend:
           requires: [build-frontend]
+      - deploy-infrastructure:
+          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+          filters:
+            branches:
+              only: [test-feature-branch]
