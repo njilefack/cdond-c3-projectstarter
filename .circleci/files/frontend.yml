@@ -30,5 +30,5 @@ Resources:
 
 Outputs:
   WebsiteURL:
-    Value: !GetAtt WebsiteBucket-jilef.WebsiteURL
+    Value: !GetAtt websitebucket-jilef.WebsiteURL
     Description: URL for website hosted on S3
