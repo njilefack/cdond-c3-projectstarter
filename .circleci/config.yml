@@ -174,12 +174,8 @@ jobs:
             #    --data ${INSTANCE_IP} \
             #    https://api.memstash.io/values/instance_ip
 
-<<<<<<< HEAD
       - run: 
          cat .circleci/ansible/inventory.txt
-=======
-      - run: cat .circleci/ansible/inventory.txt
->>>>>>> 816a63030fe77fbd540ebeb0f84ee1e27a4460b1
       - persist_to_workspace:
           root: ~/
           paths:
