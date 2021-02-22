@@ -3,8 +3,9 @@ Description: >
 
 Parameters:
   WorkflowID:
-    Description: Unique identifier.
+    Description: Unique identifier
     Type: String
+    Default: g12njrjt
 
 
 Resources:
