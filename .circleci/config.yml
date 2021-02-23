@@ -158,7 +158,7 @@ jobs:
               --stack-name frontend-stack-${CIRCLE_WORKFLOW_ID} \
               --parameter-overrides ID=${CIRCLE_WORKFLOW_ID}  
 
-# This will add back-end servers IPs to ansible inventory file
+# This will get and then add the backend server IPs to ansible inventory file
       - run:
           name: Add back-end ip to ansible inventory
           command: |
@@ -166,21 +166,56 @@ jobs:
             --filters 'Name=tag:project,Values=BackEnd-Server-*' \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --output text >> .circleci/ansible/inventory.txt)
-
-            # echo ${INSTANCE_IP}
-            # curl -H "Content-Type: text/plain" \
-            #    -H "token: ${CIRCLE_WORKFLOW_ID}" \
-            #    --request PUT \
-            #    --data ${INSTANCE_IP} \
-            #    https://api.memstash.io/values/instance_ip
-
       - run: 
          cat .circleci/ansible/inventory.txt
+
+# Get and save public ip address of backend server to https://memstash.io
+      - run:
+          name: Get and save publicIpAddress of EC2 instance to https://memstash.io/
+          command: |
+            INSTANCE_IP=$(aws ec2 describe-instances --filters 'Name=tag:project,Values=BackEnd-Server-*' --query "Reservations[*].Instances[0].PublicIpAddress" --output text)
+            echo ${INSTANCE_IP}
+            curl -H "Content-Type: text/plain" \
+               -H "token: ${CIRCLE_WORKFLOW_ID}" \
+               --request PUT \
+               --data ${INSTANCE_IP} \
+               https://api.memstash.io/values/instance_ip
+
       # - persist_to_workspace:
       #     root: ~/
       #     paths:
       #       - cdond-c3-projectstarter/.circleci/ansible/inventory.txt
-      # Here's where you will add some code to rollback on failure   
+      # Here's where you will add some code to rollback on failure
+
+  # configure-infrastructure:
+  #   docker:
+  #     - image: python:3.7-alpine3.11
+  #   steps:
+  #     - checkout
+  #     - add_ssh_keys:
+  #         fingerprints: ["d8:6b:09:ec:73:91:88:72:ef:18:3e:44:bd:50:73:de"]
+  #     # attach workspace
+  #     - run:
+  #         name: Install dependencies
+  #         command: |
+  #           apk add --update tar gzip ansible nodejs npm curl pm2 -g
+  #           apk add --no-cache --upgrade bash
+  #           apk add --no-cache --update ansible
+  #           apk add --no-cache openssh-client
+  #           exit 1
+  #     - run:
+  #         name: Configure server
+  #         command: |
+  #           INSTANCE_IP=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/instance_ip)
+  #           echo ${INSTANCE_IP}
+  #           cd ~/.circleci/ansible/
+  #           ls
+  #           echo ${INSTANCE_IP} >> ./inventory.txt
+  #           cat ./inventory.txt
+  #           export ANSIBLE_HOST_KEY_CHECKING=False
+  #           ansible-playbook -i ./inventory.txt configure-server.yml
+  #           exit 1
+      # Here's where you will add some code to rollback on failure    
 
 
 workflows:
