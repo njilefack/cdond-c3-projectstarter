@@ -209,7 +209,7 @@ jobs:
           command: |
             INSTANCE_IP=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/instance_ip)
             echo ${INSTANCE_IP}
-            cd ~/.circleci/ansible/
+            cd cdond-c3-projectstarter/.circleci/ansible/
             ls
             echo ${INSTANCE_IP} >> ./inventory.txt
             cat ./inventory.txt
