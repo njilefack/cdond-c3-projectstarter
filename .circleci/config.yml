@@ -198,7 +198,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update tar gzip ansible nodejs npm curl pm2
+            apk add --update tar gzip ansible nodejs npm curl
             apk add --no-cache --upgrade bash
             apk add --no-cache --update ansible
             apk add --no-cache openssh-client
