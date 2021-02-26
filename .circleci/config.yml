@@ -346,9 +346,9 @@ jobs:
           command: |
             if curl -s "${API_URL}" | grep "ok"
             then
-              return 1
-            else
               return 0
+            else
+              return 1
             fi
       - run:
           name: Frontend smoke test.
@@ -356,44 +356,44 @@ jobs:
             FRONTEND_URL="http://udapeople-${CIRCLE_WORKFLOW_ID}.s3-website.us-east-2.amazonaws.com/#/"
             if curl -s ${FRONTEND_URL} | grep "Welcome"
             then
-              return 1
-            else
               return 0
+            else
+              return 1
             fi
       # Here's where you will add some code to rollback on failure
 
-  cloudfront-update:
-    docker:
-      - image: amazon/aws-cli
-    steps:
-      - checkout
-      - run:
-          name: Install dependencies
-          command: |
-            # your code here
-      - run:
-          name: Update cloudfront distribution
-          command: |
-            OldWorkflowId=$(aws cloudformation list-exports --query "Exports[?Name=='WorkflowID'].Value" --output text)
-            STACKS=$(aws cloudformation list-stacks --query "StackSummaries[*].StackName" --stack-status-filter CREATE_COMPLETE --output text)
-            echo OldWorkflowId: ${OldWorkflowId}
-            echo STACKS: ${STACKS}
-            echo Update CloudFront
-            aws cloudformation deploy \
-              --stack-name circleci-stack \
-              --template-file .circleci/files/cloudfront.yml \
-              --region ${AWS_DEFAULT_REGION} \
-              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID}"
-            echo Delete old stacks/resources
-            if [[ "${STACKS[@]}" =~ "${OldWorkflowId}" ]]
-            then
-              # Delete files from bucket
-              aws s3 rm s3://udapeople-${OldWorkflowId}/ --recursive
-              # Delete front end stack
-              aws cloudformation delete-stack --stack-name udacity-frontend-${OldWorkflowId}
-              # Delete back end stack
-              aws cloudformation delete-stack --stack-name udacity-backend-${OldWorkflowId}
-            fi
+  # cloudfront-update:
+  #   docker:
+  #     - image: amazon/aws-cli
+  #   steps:
+  #     - checkout
+  #     - run:
+  #         name: Install dependencies
+  #         command: |
+  #           # your code here
+  #     - run:
+  #         name: Update cloudfront distribution
+  #         command: |
+  #           OldWorkflowId=$(aws cloudformation list-exports --query "Exports[?Name=='WorkflowID'].Value" --output text)
+  #           STACKS=$(aws cloudformation list-stacks --query "StackSummaries[*].StackName" --stack-status-filter CREATE_COMPLETE --output text)
+  #           echo OldWorkflowId: ${OldWorkflowId}
+  #           echo STACKS: ${STACKS}
+  #           echo Update CloudFront
+  #           aws cloudformation deploy \
+  #             --stack-name circleci-stack \
+  #             --template-file .circleci/files/cloudfront.yml \
+  #             --region ${AWS_DEFAULT_REGION} \
+  #             --parameter-overrides ID="${CIRCLE_WORKFLOW_ID}"
+  #           echo Delete old stacks/resources
+  #           if [[ "${STACKS[@]}" =~ "${OldWorkflowId}" ]]
+  #           then
+  #             # Delete files from bucket
+  #             aws s3 rm s3://udapeople-${OldWorkflowId}/ --recursive
+  #             # Delete front end stack
+  #             aws cloudformation delete-stack --stack-name udacity-frontend-${OldWorkflowId}
+  #             # Delete back end stack
+  #             aws cloudformation delete-stack --stack-name udacity-backend-${OldWorkflowId}
+  #           fi
       # Here's where you will add some code to rollback on failure  
 
 
@@ -425,5 +425,5 @@ workflows:
           requires: [configure-infrastructure]
       - smoke-test:
           requires: [deploy-backend, deploy-frontend]
-      - cloudfront-update:
-          requires: [smoke-test]
+      # - cloudfront-update:
+      #     requires: [smoke-test]
