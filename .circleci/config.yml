@@ -231,9 +231,8 @@ jobs:
             printenv >> ./backend/.env
             cd backend
             npm install
-            npm run migrations > migrationOutput.txt
-            cat migrationOutput.txt
-          no_output_timeout: 15m
+            npm audit fix
+            npm run migrations > migration_status
       - run:
           name: Send migration results to memstash
           command: |
