@@ -223,13 +223,14 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: backend-build-${CIRCLE_WORKFLOW_ID}
+          key: backend-build-${CIRCLE_WORKFLOW_ID}
       - run:
           name: Run migrations
           command: |
             echo printenv
             printenv >> ./backend/.env
             cd backend
+            npm install
             npm run migrations > migrationOutput.txt
             cat migrationOutput.txt
           no_output_timeout: 15m
