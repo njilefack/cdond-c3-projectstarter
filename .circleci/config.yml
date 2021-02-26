@@ -358,7 +358,7 @@ jobs:
             then
               return 0
             else
-              return 0
+              return 1
             fi
       # Here's where you will add some code to rollback on failure
 
