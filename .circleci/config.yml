@@ -236,9 +236,7 @@ jobs:
           name: Get backend url
           command: |
             INSTANCE_IP=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/instance_ip)
-# Getting INSTANCE_IP (public ip)
             echo $INSTANCE_IP 
-# Setting the API_URL of the frontend & build frontend
             echo "https://$INSTANCE_IP:3030"
             export API_URL="http://${INSTANCE_IP}:3030"
             echo "${API_URL}"
