@@ -210,9 +210,9 @@ jobs:
             PUBLIC_DNS=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/public_dns)
             echo ${PUBLIC_DNS}
             cd .circleci/ansible/
-            echo "[web]" > ./inventory
-            echo ${PUBLIC_DNS} >> ./inventory
-            cat ./inventory    
+            echo "[web]" > ./inventory.txt
+            echo ${PUBLIC_DNS} >> ./inventory.txt
+            cat ./inventory.txt    
 
       - run:
           name: Configure server using ansible
