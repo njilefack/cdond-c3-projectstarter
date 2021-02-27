@@ -160,26 +160,26 @@ jobs:
 
 # This will get and then add the backend server IPs to ansible inventory file
       - run:
-          name: Add back-end ip to ansible inventory
+          name: Add back-end public dns to ansible inventory
           command: |
-            INSTANCE_IP=$(aws ec2 describe-instances \
+            PUBLIC_DNS=$(aws ec2 describe-instances \
             --filters 'Name=tag:project,Values=BackEnd-Server-*' \
-            --query 'Reservations[*].Instances[*].PublicIpAddress' \
+            --query 'Reservations[*].Instances[*].PublicDnsName' \
             --output text >> .circleci/ansible/inventory.txt)
       - run: 
          cat .circleci/ansible/inventory.txt
 
 # Get and save public ip address of backend server to https://memstash.io
       - run:
-          name: Get and save publicIpAddress of EC2 instance to https://memstash.io/
+          name: Get and save PublicDnsName of EC2 instance to https://memstash.io/
           command: |
-            INSTANCE_IP=$(aws ec2 describe-instances --filters 'Name=tag:project,Values=BackEnd-Server-*' --query "Reservations[*].Instances[0].PublicIpAddress" --output text)
-            echo ${INSTANCE_IP}
+            PUBLIC_DNS=$(aws ec2 describe-instances --filters 'Name=tag:project,Values=BackEnd-Server-*' --query "Reservations[*].Instances[0].PublicDnsName" --output text)
+            echo ${PUBLIC_DNS}
             curl -H "Content-Type: text/plain" \
                -H "token: ${CIRCLE_WORKFLOW_ID}" \
                --request PUT \
-               --data ${INSTANCE_IP} \
-               https://api.memstash.io/values/instance_ip
+               --data ${PUBLIC_DNS} \
+               https://api.memstash.io/values/public_dns
 
       # - persist_to_workspace:
       #     root: ~/
@@ -207,10 +207,10 @@ jobs:
       - run:
           name: Configure server
           command: |
-            INSTANCE_IP=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/instance_ip)
-            echo ${INSTANCE_IP}
+            PUBLIC_DNS=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/public_dns)
+            echo ${PUBLIC_DNS}
             cd .circleci/ansible/
-            echo ${INSTANCE_IP} >> ./inventory.txt
+            echo ${PUBLIC_DNS} >> ./inventory.txt
             cat ./inventory.txt
             export ANSIBLE_HOST_KEY_CHECKING=False
             ansible-playbook -i ./inventory.txt configure-server.yml
@@ -270,11 +270,10 @@ jobs:
       - run:
           name: Get backend url
           command: |
-            INSTANCE_IP=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/instance_ip)
-            echo $INSTANCE_IP 
-            echo "https://$INSTANCE_IP:3030"
-            export API_URL="http://${INSTANCE_IP}:3030"
-            echo "${API_URL}"
+            PUBLIC_DNS=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/public_dns)
+            echo ${PUBLIC_DNS) 
+            export API_URL="http://${PUBLIC_DNS}:3030"
+            echo API_URL=${API_URL}
             cd frontend
             npm install
             npm run build
@@ -305,10 +304,15 @@ jobs:
       - run:
           name: Deploy backend
           command: |
-            INSTANCE_IP=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/instance_ip)
-            echo ${INSTANCE_IP}
+            PUBLIC_DNS=$(aws ec2 describe-instances --region ${AWS_DEFAULT_REGION} --filters 'Name=tag:project,Values=BackEnd-*' --query "Reservations[*].Instances[0].PublicDnsName" --output text)
+            echo ${PUBLIC_DNS}
+            curl -H "Content-Type: text/plain" \
+               -H "token: ${CIRCLE_WORKFLOW_ID}" \
+               --request PUT \
+               --data ${PUBLIC_DNS} \
+             https://api.memstash.io/values/public_dns  
             cd .circleci/ansible/
-            echo ${INSTANCE_IP} >> ./inventory.txt
+            echo ${PUBLIC_DNS} >> ./inventory.txt
             cat ./inventory.txt
 # Add ssh keys with fingerprint
       - add_ssh_keys:
@@ -338,8 +342,8 @@ jobs:
   #     - run:
   #         name: Get backend url
   #         command: |
-  #           INSTANCE_IP=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/instance_ip)
-  #           export API_URL="https://${INSTANCE_IP}:3030/api/status"
+  #           PUBLIC_DNS=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/public_dns)
+  #           export API_URL="https://${PUBLIC_DNS}:3030/api/status"
   #     - run:
   #         name: Backend smoke test.
   #         command: |
@@ -418,10 +422,10 @@ workflows:
          #     only: [test-feature-branch]
       - configure-infrastructure
           # requires: [deploy-infrastructure]
-      - deploy-frontend:
-          requires: [deploy-backend]
-      - deploy-backend:
-          requires: [configure-infrastructure]
+      # - deploy-frontend:
+      #     requires: [deploy-backend]
+      # - deploy-backend:
+      #     requires: [configure-infrastructure]
       # - smoke-test:
       #     requires: [deploy-backend, deploy-frontend]
       # - cloudfront-update:
