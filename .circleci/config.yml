@@ -205,20 +205,15 @@ jobs:
             pip3 install awscli
     
       - run:
-          name: Get the public DNS of EC2 instance from https://memstash.io/
+          name: Get the public DNS of EC2 instance from https://memstash.io/ & Configure server
           command: |
             PUBLIC_DNS=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/public_dns)
             echo ${PUBLIC_DNS}
             cd .circleci/ansible/
-            echo "[all]" > ./inventory.txt
+            ls
             echo ${PUBLIC_DNS} >> ./inventory.txt
             cat ./inventory.txt    
-
-      - run:
-          name: Configure server using ansible
-          command: |
-            printenv >> ./backend/.env
-            cd .circleci/ansible/
+            export ANSIBLE_HOST_KEY_CHECKING=False
             ansible-playbook -i ./inventory.txt deploy-backend.yml
 
 #Here's where you will add some code to rollback on failure -destroy-environment
@@ -412,23 +407,23 @@ jobs:
 workflows:
   default:
     jobs:
-      # - build-frontend
-      # - build-backend
-      # - test-frontend:
-      #     requires: [build-frontend]
-      # - test-backend:
-      #     requires: [build-backend]
-      # - scan-backend:
-      #     requires: [build-backend]
-      # - scan-frontend:
-      #     requires: [build-frontend]
-      # - deploy-infrastructure:
-      #     requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+      - build-frontend
+      - build-backend
+      - test-frontend:
+          requires: [build-frontend]
+      - test-backend:
+          requires: [build-backend]
+      - scan-backend:
+          requires: [build-backend]
+      - scan-frontend:
+          requires: [build-frontend]
+      - deploy-infrastructure:
+          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
          # filters:
          #   branches:
          #     only: [test-feature-branch]
-      - configure-infrastructure
-          # requires: [deploy-infrastructure]
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
       # - deploy-frontend:
       #     requires: [deploy-backend]
       # - deploy-backend:
