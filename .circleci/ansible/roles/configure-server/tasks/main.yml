@@ -1,22 +1,22 @@
 - name: "install node 12.X"
   command: |
-  curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
-  sudo apt -y upgrade
-  sudo apt install -y nodejs
+    curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
+    sudo apt -y upgrade
+    sudo apt install -y nodejs
 - name: "install pm2 by npm"
-become: true
-npm:
-  name: pm2
-  global: yes
-  production: yes
-  state: present
+  become: true
+  npm:
+    name: pm2
+    global: yes
+    production: yes
+    state: present
 
 - name: "copy files from CircleCI to server"
-copy:
-  src: /root/project/backend
-  dest: /home/ubuntu
+  copy:
+    src: /root/project/backend
+    dest: /home/ubuntu
 
 - name: "install package dependencies"
-command: |
-  cd /home/ubuntu/backend    
-  npm install 
+  command: |
+    cd /home/ubuntu/backend    
+    npm install 
