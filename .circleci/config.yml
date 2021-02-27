@@ -417,8 +417,8 @@ workflows:
          # filters:
          #   branches:
          #     only: [test-feature-branch]
-      - configure-infrastructure:
-          requires: [deploy-infrastructure]
+      - configure-infrastructure
+          # requires: [deploy-infrastructure]
       - deploy-frontend:
           requires: [deploy-backend]
       - deploy-backend:
