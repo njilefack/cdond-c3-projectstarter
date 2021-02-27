@@ -292,9 +292,6 @@ jobs:
       - image: python:3.7-alpine3.11
     steps:
       - checkout
-      # Add ssh keys with fingerprint
-      - add_ssh_keys:
-          fingerprints: ["d8:6b:09:ec:73:91:88:72:ef:18:3e:44:bd:50:73:de"]
       # attach workspace
       - run:
           name: Install dependencies
@@ -305,61 +302,64 @@ jobs:
             apk add --no-cache openssh-client
             pip3 install awscli
 
-# Get the backtend URL
+# Get the backtend URL from https://memstash.io
       - run:
           name: Deploy backend
-          no_output_timeout: 15m
           command: |
             INSTANCE_IP=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/instance_ip)
             echo ${INSTANCE_IP}
             cd .circleci/ansible/
             echo ${INSTANCE_IP} >> ./inventory.txt
             cat ./inventory.txt
-            # cd /root/project/
-            ls
-            pwd
-            export ANSIBLE_HOST_KEY_CHECKING=False
+# Add ssh keys with fingerprint
+      - add_ssh_keys:
+          fingerprints: ["d8:6b:09:ec:73:91:88:72:ef:18:3e:44:bd:50:73:de"]
+      - run:
+          name: Configure backend server using ansible and then deploy backend
+          command: |
+            printenv >> ./backend/.env
+            cd .circleci/ansible/
             ansible-playbook -i ./inventory.txt deploy-backend.yml
             
       #Here's where you will add some code to rollback on failure
 
-  smoke-test:
-    docker:
-       - image: python:3.7-alpine3.11
-    steps:
-      - checkout
-      - run:
-          name: Install dependencies
-          command: |
-            apk add --no-cache curl
-            apk add --no-cache --upgrade bash
-            apk add --no-cache --update ansible
-            apk add --no-cache openssh-client
-            pip3 install awscli
-      - run:
-          name: Get backend url
-          command: |
-            INSTANCE_IP=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/instance_ip)
-            export API_URL="https://${INSTANCE_IP}:3030/api/status"
-      - run:
-          name: Backend smoke test.
-          command: |
-            if curl -s "${API_URL}" | grep "ok"
-            then
-              return 0
-            else
-              return 1
-            fi
-      - run:
-          name: Frontend smoke test.
-          command: |
-            FRONTEND_URL="http://udapeople-${CIRCLE_WORKFLOW_ID}.s3-website.us-east-2.amazonaws.com/#/"
-            if curl -s ${FRONTEND_URL} | grep "Welcome"
-            then
-              return 0
-            else
-              return 1
-            fi
+  # smoke-test:
+  #   docker:
+  #      - image: python:3.7-alpine3.11
+  #   steps:
+  #     - checkout
+  #     - run:
+  #         name: Install dependencies
+  #         command: |
+  #           apk add --no-cache curl
+  #           apk add --no-cache --upgrade bash
+  #           apk add --no-cache --update ansible
+  #           apk add --no-cache openssh-client
+  #           pip3 install awscli
+  #     - run:
+  #         name: Get backend url
+  #         command: |
+  #           INSTANCE_IP=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/instance_ip)
+  #           export API_URL="https://${INSTANCE_IP}:3030/api/status"
+  #     - run:
+  #         name: Backend smoke test.
+  #         command: |
+  #           if curl -s "${API_URL}" | grep "ok"
+  #           then
+  #             return 0
+  #           else
+  #             return 1
+  #           fi
+  #     - run:
+  #         name: Frontend smoke test.
+  #         command: |
+  #           FRONTEND_URL="http://udapeople-${CIRCLE_WORKFLOW_ID}.s3-website.us-east-2.amazonaws.com/#/"
+  #           if curl -s ${FRONTEND_URL} | grep "Welcome"
+  #           then
+  #             return 0
+  #           else
+  #             return 1
+  #           fi
       # Here's where you will add some code to rollback on failure
 
   # cloudfront-update:
@@ -423,7 +423,7 @@ workflows:
           requires: [deploy-backend]
       - deploy-backend:
           requires: [configure-infrastructure]
-      - smoke-test:
-          requires: [deploy-backend, deploy-frontend]
+      # - smoke-test:
+      #     requires: [deploy-backend, deploy-frontend]
       # - cloudfront-update:
       #     requires: [smoke-test]
