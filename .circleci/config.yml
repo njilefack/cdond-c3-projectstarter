@@ -205,15 +205,12 @@ jobs:
             pip3 install awscli
 
       - run:
-          name: Configure server
+          name: Configure server using ansible
           command: |
-            PUBLIC_DNS=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/public_dns)
-            echo ${PUBLIC_DNS}
+            printenv >> ./backend/.env
             cd .circleci/ansible/
-            echo ${PUBLIC_DNS} >> ./inventory.txt
-            cat ./inventory.txt
-            export ANSIBLE_HOST_KEY_CHECKING=False
-            ansible-playbook -i ./inventory.txt configure-server.yml
+            ansible-playbook -i ./inventory deploy.yml
+
 #Here's where you will add some code to rollback on failure -destroy-environment
 
   # run-migrations:
@@ -405,23 +402,23 @@ jobs:
 workflows:
   default:
     jobs:
-      # - build-frontend
-      # - build-backend
-      # - test-frontend:
-      #     requires: [build-frontend]
-      # - test-backend:
-      #     requires: [build-backend]
-      # - scan-backend:
-      #     requires: [build-backend]
-      # - scan-frontend:
-      #     requires: [build-frontend]
-      # - deploy-infrastructure:
-      #     requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+      - build-frontend
+      - build-backend
+      - test-frontend:
+          requires: [build-frontend]
+      - test-backend:
+          requires: [build-backend]
+      - scan-backend:
+          requires: [build-backend]
+      - scan-frontend:
+          requires: [build-frontend]
+      - deploy-infrastructure:
+          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
          # filters:
          #   branches:
          #     only: [test-feature-branch]
-      - configure-infrastructure
-          # requires: [deploy-infrastructure]
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
       # - deploy-frontend:
       #     requires: [deploy-backend]
       # - deploy-backend:
