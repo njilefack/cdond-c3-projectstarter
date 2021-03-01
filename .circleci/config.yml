@@ -343,7 +343,8 @@ jobs:
           name: Get backend url
           command: |
             PUBLIC_DNS=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/public_dns)
-            export API_URL="https://${PUBLIC_DNS}:3030/api/status"
+            echo ${PUBLIC_DNS}
+            if curl -s "http://${PUBLIC_DNS}:3030/api/status" | grep "ok"
       - run:
           name: Backend smoke test.
           command: |
