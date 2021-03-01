@@ -8,11 +8,11 @@
   apt:
     name: ["nodejs", "npm"]
     update_cache: yes
-
+           
 - name: "Get cdond-c3-projectstarter/backend files from circleci server to local"
   become: true
   copy:
-    src: cdond-c3-projectstarter/backend/
+    src: /root/project/backend
     dest: /home/ubuntu
 
 - name: make sure the latest npm is installed

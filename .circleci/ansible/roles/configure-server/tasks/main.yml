@@ -15,6 +15,10 @@
     production: yes
     state: present
 
+- name: install faster copy utility to copy files from CircleCI to server
+  become: true
+  command: npm install copyfiles -g
+
 - name: "copy files from CircleCI to server"
   copy:
     src: /root/project/backend
