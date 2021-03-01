@@ -1,6 +1,6 @@
   
-- name: "NPM Run Build"
-  command: npm run build
+- name: "NPM install"
+  command: npm install
   args:
     chdir: /home/ubuntu/backend
 
