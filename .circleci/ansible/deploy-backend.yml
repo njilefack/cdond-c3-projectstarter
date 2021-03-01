@@ -3,9 +3,9 @@
 - name: "Server Configurations" 
   hosts: web
   pre_tasks:
-    - name: "wait 60 seconds then move on"
+    - name: "wait 10 seconds then move on"
       wait_for:
-        timeout: 60
+        timeout: 10
   user: ubuntu
 
   vars:

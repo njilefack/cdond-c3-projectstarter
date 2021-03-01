@@ -4,6 +4,11 @@
   args:
     chdir: /home/ubuntu/backend
 
+- name: "NPM Run Build"
+  command: npm run build
+  args:
+    chdir: /home/ubuntu/backend
+
 - name: "run migrations and save status to https://memstash.io/"
   command: |
     cd /home/ubuntu/backend
