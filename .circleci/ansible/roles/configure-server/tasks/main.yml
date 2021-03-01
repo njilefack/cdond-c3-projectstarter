@@ -25,9 +25,6 @@
   command: npm install copyfiles -g
 
 - name: "copy files from CircleCI to server"
-  command: |
-    cd /home/ubuntu
-    rm -rf backend
   copy:
     src: /root/project/backend.zip
     dest: /home/ubuntu
@@ -36,6 +33,7 @@
   command: |
     cd /root/project
     unzip backend.zip .
+    rm -rf backend.zip
 
 - name: "install package dependencies"
   command: |
