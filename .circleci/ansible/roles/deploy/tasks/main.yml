@@ -1,8 +1,9 @@
   
-- name: "build package"
-  command: |
-    cd /home/ubuntu/backend
-    npm run build
+- name: "NPM Run Build"
+  command: npm run build
+  args:
+    chdir: /home/ubuntu
+
 - name: "run migrations and save status to https://memstash.io/"
   command: |
     cd /home/ubuntu/backend

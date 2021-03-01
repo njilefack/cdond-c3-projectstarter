@@ -297,6 +297,7 @@ jobs:
       # attach workspace
       - run:
           name: Install dependencies
+          no_output_timeout: 15m
           command: |
             apk add --no-cache curl
             apk add --no-cache --upgrade bash
