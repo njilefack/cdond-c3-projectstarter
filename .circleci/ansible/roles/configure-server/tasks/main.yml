@@ -17,7 +17,7 @@
 
 - name: zip backend folder
   command: |
-    zip -r /root/project/backend.zip backend/
+    zip -r /root/project/backend.zip . -i backend/
 
 - name: install faster copy utility to copy files from CircleCI to server
   become: true
