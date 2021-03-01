@@ -17,8 +17,7 @@
 
 - name: zip backend folder
   command: |
-    cd /root/project
-    zip -r backend.zip backend/
+    zip -r /root/project/backend.zip backend/
 
 - name: install faster copy utility to copy files from CircleCI to server
   become: true
@@ -29,7 +28,7 @@
     src: /root/project/backend.zip
     dest: /home/ubuntu
 
-- name: unzip backend folder
+- name: unzip backend.zp to have the backend folder
   command: |
     cd /home/ubuntu
     unzip backend.zip .
