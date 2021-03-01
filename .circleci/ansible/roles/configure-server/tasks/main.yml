@@ -34,7 +34,7 @@
     src: /home/ubuntu/backend.zip
     dest: /home/ubuntu
     remote_src: yes
-    delete_archive: yes
+    # delete_archive: yes
 
 - name: "install package dependencies"
   command: |
