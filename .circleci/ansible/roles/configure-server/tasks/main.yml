@@ -30,12 +30,13 @@
     dest: /home/ubuntu
 
 - name: unzip backend.zp to have the backend folder
-  command: |
-    cd /home/ubuntu
-    unzip backend.zip .
-    rm -rf backend.zip
+  ansible.builtin.unarchive:
+    src: /home/ubuntu/backend.zip
+    dest: /home/ubuntu
+    remote_src: yes
 
 - name: "install package dependencies"
   command: |
-    cd /home/ubuntu/backend    
+    cd /home/ubuntu/backend
+    rm -rf backend.zip    
     npm install 
