@@ -34,9 +34,9 @@
     src: /home/ubuntu/backend.zip
     dest: /home/ubuntu
     remote_src: yes
+    delete_archive: yes
 
 - name: "install package dependencies"
   command: |
-    cd /home/ubuntu/backend
-    rm -rf backend.zip    
+    cd /home/ubuntu/backend 
     npm install 
