@@ -5,7 +5,7 @@
 - name: "install dependencies."
   become: true
   apt:
-    name: ["nodejs", "npm"]
+    name: ["nodejs", "npm", "zip"]
     update_cache: yes
 - name: "install pm2"
   become: true
@@ -15,14 +15,27 @@
     production: yes
     state: present
 
+- name: zip backend folder
+  command: |
+    cd /root/project
+    zip backend.zip .
+
 - name: install faster copy utility to copy files from CircleCI to server
   become: true
   command: npm install copyfiles -g
 
 - name: "copy files from CircleCI to server"
+  command: |
+    cd /home/ubuntu
+    rm -rf backend
   copy:
-    src: /root/project/backend
+    src: /root/project/backend.zip
     dest: /home/ubuntu
+
+- name: unzip backend folder
+  command: |
+    cd /root/project
+    unzip backend.zip .
 
 - name: "install package dependencies"
   command: |
