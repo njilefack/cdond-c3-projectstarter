@@ -218,38 +218,40 @@ jobs:
 
 #Here's where you will add some code to rollback on failure -destroy-environment
 
-  # run-migrations:
-  #   docker:
-  #     - image: circleci/node:13.8.0
-  #   steps:
-  #     - checkout
-  #     - restore_cache:
-  #         key: backend-build-${CIRCLE_WORKFLOW_ID}
-  #     - run:
-  #         name: Run migrations
-  #         command: |
-  #           echo printenv
-  #           printenv >> ./backend/.env
-  #           cd backend
-  #           npm install
-  #           npm audit fix
-  #           npm run migrations > migration_status
-  #     - run:
-  #         name: Send migration results to memstash
-  #         command: |
-  #           cd backend
-  #           echo grep -c "No migrations are pending" migrationOutput.txt
-  #           MIGRATION_RESULT=`grep -c "No migrations are pending" migrationOutput.txt`
-  #           echo $MIGRATION_RESULT
-  #           curl -H "Content-Type: text/plain" \
-  #              -H "token: ${CIRCLE_WORKFLOW_ID}" \
-  #              --request PUT \
-  #              --data ${MIGRATION_RESULT} \
-  #              https://api.memstash.io/values/migration_result
+#This will perform Database Migrations
+  run-migrations:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - restore_cache:
+          key: backend-build-${CIRCLE_WORKFLOW_ID}
+      - run:
+          name: Run migrations
+          command: |
+            echo printenv
+            printenv >> ./backend/.env
+            cd backend
+            npm install
+            npm audit fix
+            npm run migrations > migration_status.txt
+            cat migration_status.txt
+      - run:
+          name: Send migration results to memstash
+          command: |
+            cd backend
+            echo grep -c "No migrations are pending" migrationOutput.txt
+            MIGRATION_RESULT=`grep -c "No migrations are pending" migrationOutput.txt`
+            echo $MIGRATION_RESULT
+            curl -H "Content-Type: text/plain" \
+               -H "token: ${CIRCLE_WORKFLOW_ID}" \
+               --request PUT \
+               --data ${MIGRATION_RESULT} \
+               https://api.memstash.io/values/migration_result
 
-  #           VERIFY_RESPONSE=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/migration_result)
-  #           echo "test memstash result"
-  #           echo ${VERIFY_RESPONSE}
+            VERIFY_RESPONSE=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/migration_result)
+            echo "test memstash result"
+            echo ${VERIFY_RESPONSE}
 
 
      # Here's where you will add some code to rollback on failure  
@@ -417,13 +419,15 @@ workflows:
       #     requires: [build-backend]
       # - scan-frontend:
       #     requires: [build-frontend]
-      - deploy-infrastructure
+      #- deploy-infrastructure:
       #     requires: [test-frontend, test-backend, scan-frontend, scan-backend]
          # filters:
          #   branches:
          #     only: [test-feature-branch]
-      - configure-infrastructure:
-          requires: [deploy-infrastructure]
+      # - configure-infrastructure:
+      #     requires: [deploy-infrastructure]
+      - run-migrations:
+          requires: [configure-infrastructure]
       # - deploy-frontend:
       #     requires: [deploy-backend]
       # - deploy-backend:
