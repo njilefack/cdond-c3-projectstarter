@@ -326,43 +326,43 @@ jobs:
             
       #Here's where you will add some code to rollback on failure
 
-  # smoke-test:
-  #   docker:
-  #      - image: python:3.7-alpine3.11
-  #   steps:
-  #     - checkout
-  #     - run:
-  #         name: Install dependencies
-  #         command: |
-  #           apk add --no-cache curl
-  #           apk add --no-cache --upgrade bash
-  #           apk add --no-cache --update ansible
-  #           apk add --no-cache openssh-client
-  #           pip3 install awscli
-  #     - run:
-  #         name: Get backend url
-  #         command: |
-  #           PUBLIC_DNS=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/public_dns)
-  #           export API_URL="https://${PUBLIC_DNS}:3030/api/status"
-  #     - run:
-  #         name: Backend smoke test.
-  #         command: |
-  #           if curl -s "${API_URL}" | grep "ok"
-  #           then
-  #             return 0
-  #           else
-  #             return 1
-  #           fi
-  #     - run:
-  #         name: Frontend smoke test.
-  #         command: |
-  #           FRONTEND_URL="http://udapeople-${CIRCLE_WORKFLOW_ID}.s3-website.us-east-2.amazonaws.com/#/"
-  #           if curl -s ${FRONTEND_URL} | grep "Welcome"
-  #           then
-  #             return 0
-  #           else
-  #             return 1
-  #           fi
+  smoke-test:
+    docker:
+       - image: python:3.7-alpine3.11
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --no-cache curl
+            apk add --no-cache --upgrade bash
+            apk add --no-cache --update ansible
+            apk add --no-cache openssh-client
+            pip3 install awscli
+      - run:
+          name: Get backend url
+          command: |
+            PUBLIC_DNS=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/public_dns)
+            export API_URL="https://${PUBLIC_DNS}:3030/api/status"
+      - run:
+          name: Backend smoke test.
+          command: |
+            if curl -s "${API_URL}" | grep "ok"
+            then
+              return 0
+            else
+              return 1
+            fi
+      - run:
+          name: Frontend smoke test.
+          command: |
+            FRONTEND_URL="http://udapeople-${CIRCLE_WORKFLOW_ID}.s3-website.us-east-2.amazonaws.com/#/"
+            if curl -s ${FRONTEND_URL} | grep "Welcome"
+            then
+              return 0
+            else
+              return 1
+            fi
       # Here's where you will add some code to rollback on failure
 
   # cloudfront-update:
@@ -404,30 +404,30 @@ jobs:
 workflows:
   default:
     jobs:
-      - build-frontend
-      - build-backend
-      - test-frontend:
-          requires: [build-frontend]
-      - test-backend:
-          requires: [build-backend]
-      - scan-backend:
-          requires: [build-backend]
-      - scan-frontend:
-          requires: [build-frontend]
-      - deploy-infrastructure:
-          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+      # - build-frontend
+      # - build-backend
+      # - test-frontend:
+      #     requires: [build-frontend]
+      # - test-backend:
+      #     requires: [build-backend]
+      # - scan-backend:
+      #     requires: [build-backend]
+      # - scan-frontend:
+      #     requires: [build-frontend]
+      # - deploy-infrastructure:
+      #     requires: [test-frontend, test-backend, scan-frontend, scan-backend]
          # filters:
          #   branches:
          #     only: [test-feature-branch]
-      - configure-infrastructure:
-          requires: [deploy-infrastructure]
+      # - configure-infrastructure:
+      #     requires: [deploy-infrastructure]
       # - run-migrations:
       #     requires: [configure-infrastructure]
-      - deploy-frontend:
-          requires: [deploy-backend]
-      - deploy-backend:
-          requires: [configure-infrastructure]
-      # - smoke-test:
-      #     requires: [deploy-backend, deploy-frontend]
+      # - deploy-frontend:
+      #     requires: [deploy-backend]
+      # - deploy-backend:
+      #     requires: [configure-infrastructure]
+      - smoke-test:
+          requires: [deploy-backend, deploy-frontend]
       # - cloudfront-update:
       #     requires: [smoke-test]
