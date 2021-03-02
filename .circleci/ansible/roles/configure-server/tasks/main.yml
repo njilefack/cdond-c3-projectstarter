@@ -15,15 +15,6 @@
     production: yes
     state: present
 
-# - name: zip backend folder
-#   command: |
-#     zip -r /root/project/backend.zip . -i backend/
-#   become: true
-
-# - name: install faster copy utility to copy files from CircleCI to server
-#   become: true
-#   command: npm install copyfiles -g
-
 - name: "copy files from CircleCI to server"
   copy:
     src: /root/project/backend.zip
@@ -36,7 +27,9 @@
     remote_src: yes
     # delete_archive: yes
 
-# - name: "install package dependencies"
-#   command: |
-#     cd /home/ubuntu/backend 
-#     npm install 
+- name: "install package dependencies"
+  command: |
+    cd /home/ubuntu/backend 
+    npm install 
+  args:
+    chdir: /home/ubuntu/backend
