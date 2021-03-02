@@ -28,8 +28,6 @@
     # delete_archive: yes
 
 - name: "install package dependencies"
-  command: |
-    cd /home/ubuntu/backend 
-    npm install 
+  command: npm install 
   args:
     chdir: /home/ubuntu/backend
