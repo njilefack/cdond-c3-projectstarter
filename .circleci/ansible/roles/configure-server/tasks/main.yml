@@ -27,7 +27,7 @@
     remote_src: yes
     # delete_archive: yes
 
-# - name: "install package dependencies"
-#   command: npm install 
-#   args:
-#     chdir: /home/ubuntu
+- name: "install package dependencies"
+  command: npm install 
+  args:
+    chdir: /home/ubuntu/backend
