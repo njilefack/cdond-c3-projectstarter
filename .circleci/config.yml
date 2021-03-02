@@ -339,16 +339,16 @@ jobs:
             apk add --no-cache --update ansible
             apk add --no-cache openssh-client
             pip3 install awscli
-      - run:
-          name: Frontend smoke test
-          command: |
-            URL="http://udapeople-${CIRCLE_WORKFLOW_ID}.s3-website-us-west-2.amazonaws.com"
-            if curl -s ${URL} | grep "Welcome"
-            then
-              return 0
-            else
-              return 1
-            fi
+      # - run:
+      #     name: Frontend smoke test
+      #     command: |
+      #       URL="http://udapeople-${CIRCLE_WORKFLOW_ID}.s3-website-us-west-2.amazonaws.com"
+      #       if curl -s ${URL} | grep "Welcome"
+      #       then
+      #         return 0
+      #       else
+      #         return 1
+      #       fi
       - run:
           name: Backend smoke test.
           command: |
