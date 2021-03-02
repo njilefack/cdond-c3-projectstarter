@@ -20,9 +20,9 @@
 #     zip -r /root/project/backend.zip . -i backend/
 #   become: true
 
-- name: install faster copy utility to copy files from CircleCI to server
-  become: true
-  command: npm install copyfiles -g
+# - name: install faster copy utility to copy files from CircleCI to server
+#   become: true
+#   command: npm install copyfiles -g
 
 - name: "copy files from CircleCI to server"
   copy:
