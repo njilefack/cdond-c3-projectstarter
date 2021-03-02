@@ -1,18 +1,13 @@
   
-- name: "NPM install"
-  command: npm install
-  args:
-    chdir: /home/ubuntu/backend
-
-- name: "NPM Run Build"
-  command: npm run build
-  args:
-    chdir: /home/ubuntu/backend
-
+- name: "build package"
+  shell: |
+    cd /home/ubuntu/backend
+    npm run build
+    
 - name: "run migrations and save status to https://memstash.io/"
   shell: |
-    cd /home/ubuntu/backend/src
-    npm run migrations >> migrations.txt
+    cd /home/ubuntu/backend
+    npm run migrations > migrations.txt
     cat migrations.txt
     export CIRCLE_WORKFLOW_ID="{{ CIRCLE_WORKFLOW_ID }}"
     echo CIRCLE_WORKFLOW_ID=${CIRCLE_WORKFLOW_ID}
@@ -23,9 +18,6 @@
     msg: "{{ migration_output.stdout_lines }}"
 
 - name: "use pm2 to run the node server"
-  command: pm2 start npm -- run "start:dev"
-  args:
-    chdir: /home/ubuntu/backend
-
-
-    
+  shell: |
+    cd /home/ubuntu/backend
+    pm2 start npm -- run "start:dev"
