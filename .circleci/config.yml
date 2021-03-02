@@ -219,39 +219,38 @@ jobs:
 #Here's where you will add some code to rollback on failure -destroy-environment
 
 #This will perform Database Migrations
-  # run-migrations:
-  #   docker:
-  #     - image: circleci/node:13.8.0
-  #   steps:
-  #     - checkout
-  #     - restore_cache:
-  #         key: backend-build-${CIRCLE_WORKFLOW_ID}
-  #     - run:
-  #         name: Run migrations
-  #         command: |
-  #           echo printenv
-  #           printenv >> ./backend/.env
-  #           cd backend
-  #           npm install
-  #           npm audit fix
-  #           npm run migrations > migration_status.txt
-  #           cat migration_status.txt
-  #     - run:
-  #         name: Send migration results to memstash
-  #         command: |
-  #           cd backend
-  #           echo grep -c "No migrations are pending" migrationOutput.txt
-  #           MIGRATION_RESULT=`grep -c "No migrations are pending" migrationOutput.txt`
-  #           echo $MIGRATION_RESULT
-  #           curl -H "Content-Type: text/plain" \
-  #              -H "token: ${CIRCLE_WORKFLOW_ID}" \
-  #              --request PUT \
-  #              --data ${MIGRATION_RESULT} \
-  #              https://api.memstash.io/values/migration_result
+  run-migrations:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - restore_cache:
+          key: backend-build-${CIRCLE_WORKFLOW_ID}
+      - run:
+          name: Run migrations
+          command: |
+            cd backend
+            npm install
+            npm run migrations >> migration_status.txt
+            cat migration_status.txt
+          no_output_timeout: 15m
+      - run:
+          name: Send migration results to memstash
+          command: |
+            cd backend
+            echo grep -c "No migrations are pending" migrationOutput.txt
+            MIGRATION_RESULT=`grep -c "No migrations are pending" migrationOutput.txt`
+            PUBLIC_DNS=$(aws ec2 describe-instances --filters 'Name=tag:project,Values=BackEnd-Server-*' --query "Reservations[*].Instances[0].PublicDnsName" --output text)
+            echo $MIGRATION_RESULT
+            curl -H "Content-Type: text/plain" \
+               -H "token: ${CIRCLE_WORKFLOW_ID}" \
+               --request PUT \
+               --data ${MIGRATION_RESULT} \
+               https://api.memstash.io/values/migration_result
 
-  #           VERIFY_RESPONSE=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/migration_result)
-  #           echo "test memstash result"
-  #           echo ${VERIFY_RESPONSE}
+            VERIFY_RESPONSE=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/migration_result)
+            echo "test memstash result"
+            echo ${VERIFY_RESPONSE}
 
 
      # Here's where you will add some code to rollback on failure  
@@ -259,7 +258,7 @@ jobs:
 # frontend deployment
   deploy-frontend:
     docker:
-      - image: python:3.7-alpine3.11
+      - image: amazon/aws-cli
     steps:
       - checkout
       - run:
@@ -334,21 +333,29 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --no-cache curl
+            apk add --no-cache curl nodejs npm
             apk add --no-cache --upgrade bash
             apk add --no-cache --update ansible
             apk add --no-cache openssh-client
             pip3 install awscli
+      - run:
+          name: Frontend smoke test
+          command: |
+            URL="http://udapeople-${CIRCLE_WORKFLOW_ID}.s3-website-us-west-2.amazonaws.com"
+            if curl -s ${URL} | grep "Welcome"
+            then
+              return 0
+            else
+              return 1
+            fi
+
       # - run:
-      #     name: Frontend smoke test
+      #     name: Get backend url
       #     command: |
-      #       URL="http://udapeople-${CIRCLE_WORKFLOW_ID}.s3-website-us-west-2.amazonaws.com"
-      #       if curl -s ${URL} | grep "Welcome"
-      #       then
-      #         return 0
-      #       else
-      #         return 1
-      #       fi
+      #       PUBLIC_DNS=$(aws ec2 describe-instances --filters 'Name=tag:project,Values=BackEnd-Server-*' --query "Reservations[*].Instances[0].PublicDnsName" --output text)
+      #       API_URL="http://${PUBLIC_DNS}:3030"
+      #       curl -s ${API_URL}
+
       - run:
           name: Backend smoke test.
           command: |
@@ -400,30 +407,30 @@ jobs:
 workflows:
   default:
     jobs:
-      # - build-frontend
-      # - build-backend
-      # - test-frontend:
-      #     requires: [build-frontend]
-      # - test-backend:
-      #     requires: [build-backend]
-      # - scan-backend:
-      #     requires: [build-backend]
-      # - scan-frontend:
-      #     requires: [build-frontend]
-      # - deploy-infrastructure:
-      #     requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+      - build-frontend
+      - build-backend
+      - test-frontend:
+          requires: [build-frontend]
+      - test-backend:
+          requires: [build-backend]
+      - scan-backend:
+          requires: [build-backend]
+      - scan-frontend:
+          requires: [build-frontend]
+      - deploy-infrastructure:
+          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
          # filters:
          #   branches:
          #     only: [test-feature-branch]
-      # - configure-infrastructure:
-      #     requires: [deploy-infrastructure]
-      # - run-migrations:
-      #     requires: [configure-infrastructure]
-      # - deploy-frontend:
-      #     requires: [deploy-backend]
-      # - deploy-backend:
-      #     requires: [configure-infrastructure]
-      - smoke-test
-          # requires: [deploy-backend, deploy-frontend]
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
+      - run-migrations:
+          requires: [configure-infrastructure]
+      - deploy-frontend:
+          requires: [deploy-backend]
+      - deploy-backend:
+          requires: [configure-infrastructure]
+      - smoke-test:
+          requires: [deploy-backend, deploy-frontend]
       # - cloudfront-update:
       #     requires: [smoke-test]
