@@ -238,19 +238,25 @@ jobs:
           name: Send migration results to memstash
           command: |
             cd backend
-            echo grep -c "No migrations are pending" migrationOutput.txt
-            MIGRATION_RESULT=`grep -c "No migrations are pending" migrationOutput.txt`
-            PUBLIC_DNS=$(aws ec2 describe-instances --filters 'Name=tag:project,Values=BackEnd-Server-*' --query "Reservations[*].Instances[0].PublicDnsName" --output text)
-            echo $MIGRATION_RESULT
-            curl -H "Content-Type: text/plain" \
-               -H "token: ${CIRCLE_WORKFLOW_ID}" \
-               --request PUT \
-               --data ${MIGRATION_RESULT} \
-               https://api.memstash.io/values/migration_result
+            cat migrations_status.txt
+            export CIRCLE_WORKFLOW_ID="{{ CIRCLE_WORKFLOW_ID }}"
+            echo CIRCLE_WORKFLOW_ID=${CIRCLE_WORKFLOW_ID}
+            curl -H "Content-Type: text/plain" -H "token: ${CIRCLE_WORKFLOW_ID}" --request PUT --data $( grep -c "No migrations are pending" migrations.txt ) https://api.memstash.io/values/migration_status
+            register: migration_output
 
-            VERIFY_RESPONSE=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/migration_result)
-            echo "test memstash result"
-            echo ${VERIFY_RESPONSE}
+            # echo grep -c "No migrations are pending" migrationOutput.txt
+            # MIGRATION_RESULT=`grep -c "No migrations are pending" migrationOutput.txt`
+            # PUBLIC_DNS=$(aws ec2 describe-instances --filters 'Name=tag:project,Values=BackEnd-Server-*' --query "Reservations[*].Instances[0].PublicDnsName" --output text)
+            # echo $MIGRATION_RESULT
+            # curl -H "Content-Type: text/plain" \
+            #    -H "token: ${CIRCLE_WORKFLOW_ID}" \
+            #    --request PUT \
+            #    --data ${MIGRATION_RESULT} \
+            #    https://api.memstash.io/values/migration_result
+
+            # VERIFY_RESPONSE=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/migration_result)
+            # echo "test memstash result"
+            # echo ${VERIFY_RESPONSE}
 
 
      # Here's where you will add some code to rollback on failure  
