@@ -249,14 +249,6 @@ jobs:
   deploy-frontend:
     docker:
       - image: python:3.7-alpine3.11
-        environment:
-         TYPEORM_CONNECTION: $TYPEORM_CONNECTION
-         TYPEORM_HOST: $TYPEORM_HOST
-         TYPEORM_USERNAME: $TYPEORM_USERNAME
-         TYPEORM_PASSWORD: $TYPEORM_PASSWORD
-         TYPEORM_DATABASE: $TYPEORM_DATABASE
-         TYPEORM_MIGRATIONS: $TYPEORM_MIGRATIONS
-         TYPEORM_ENTITIES: $TYPEORM_ENTITIES
     steps:
       - checkout
       - run:
@@ -289,6 +281,15 @@ jobs:
   deploy-backend:
     docker:
       - image: python:3.7-alpine3.11
+        environment:
+         TYPEORM_CONNECTION: $TYPEORM_CONNECTION
+         TYPEORM_HOST: $TYPEORM_HOST
+         TYPEORM_USERNAME: $TYPEORM_USERNAME
+         TYPEORM_PASSWORD: $TYPEORM_PASSWORD
+         TYPEORM_DATABASE: $TYPEORM_DATABASE
+         TYPEORM_MIGRATIONS: $TYPEORM_MIGRATIONS
+         TYPEORM_ENTITIES: $TYPEORM_ENTITIES
+
     steps:
       - checkout
       # attach workspace
@@ -406,30 +407,30 @@ jobs:
 workflows:
   default:
     jobs:
-      # - build-frontend
-      # - build-backend
-      # - test-frontend:
-      #     requires: [build-frontend]
-      # - test-backend:
-      #     requires: [build-backend]
-      # - scan-backend:
-      #     requires: [build-backend]
-      # - scan-frontend:
-      #     requires: [build-frontend]
-      # - deploy-infrastructure:
-      #     requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+      - build-frontend
+      - build-backend
+      - test-frontend:
+          requires: [build-frontend]
+      - test-backend:
+          requires: [build-backend]
+      - scan-backend:
+          requires: [build-backend]
+      - scan-frontend:
+          requires: [build-frontend]
+      - deploy-infrastructure:
+          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
          # filters:
          #   branches:
          #     only: [test-feature-branch]
-      # - configure-infrastructure:
-      #     requires: [deploy-infrastructure]
-      # - run-migrations:
-      #     requires: [configure-infrastructure]
-      # - deploy-frontend:
-      #     requires: [run-migrations]
-      # - deploy-backend:
-      #     requires: [run-migrations]
-       - smoke-test
-      #     requires: [deploy-backend, deploy-frontend]
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
+      - run-migrations:
+          requires: [configure-infrastructure]
+      - deploy-frontend:
+          requires: [run-migrations]
+      - deploy-backend:
+          requires: [run-migrations]
+      - smoke-test:
+          requires: [deploy-backend, deploy-frontend]
       # - cloudfront-update:
       #     requires: [smoke-test]
