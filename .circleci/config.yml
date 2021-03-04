@@ -266,7 +266,8 @@ jobs:
             PUBLIC_DNS=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/public_dns)
             echo ${PUBLIC_DNS} 
             export API_URL="http://${PUBLIC_DNS}:3030"
-            echo API_URL=${API_URL}
+            echo "API_URL=$API_URL" >> frontend/.env
+            echo "${API_URL}"
             cd frontend
             npm install
             npm run build
@@ -281,14 +282,6 @@ jobs:
   deploy-backend:
     docker:
       - image: python:3.7-alpine3.11
-        environment:
-         TYPEORM_CONNECTION: $TYPEORM_CONNECTION
-         TYPEORM_HOST: $TYPEORM_HOST
-         TYPEORM_USERNAME: $TYPEORM_USERNAME
-         TYPEORM_PASSWORD: $TYPEORM_PASSWORD
-         TYPEORM_DATABASE: $TYPEORM_DATABASE
-         TYPEORM_MIGRATIONS: $TYPEORM_MIGRATIONS
-         TYPEORM_ENTITIES: $TYPEORM_ENTITIES
 
     steps:
       - checkout
@@ -303,9 +296,10 @@ jobs:
             apk add --no-cache openssh-client
             pip3 install awscli
 
-# Get the backtend public dns from https://memstash.io
+# Get the backtend public dns from https://memstash.io and deploy backend
       - run:
-          name: Deploy backend
+          name: Get EC2 instance public dns & deploy backend
+          no_output_timeout: 15m
           command: |
             PUBLIC_DNS=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/public_dns)
             echo ${PUBLIC_DNS} 
