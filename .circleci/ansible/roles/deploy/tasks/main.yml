@@ -24,7 +24,6 @@
     src: /home/ubuntu/backend.zip
     dest: /home/ubuntu
     remote_src: yes
-    remove: yes
 
 # - name: "delete backend.zip file from CircleCI to server"
 #   ansible.builtin.unarchive:
