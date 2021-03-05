@@ -14,18 +14,6 @@
     production: yes
     state: present
 
-- name: "npm install"
-  become: true
-  command: npm install
-  args:
-    chdir: /home/ubuntu/backend
-
-- name: "npm build"
-  become: true
-  command: npm run build
-  args:
-    chdir: /home/ubuntu/backend
-
 - name: "copy files from CircleCI to server"
   copy:
     src: /root/project/backend.zip
@@ -42,8 +30,15 @@
     path: /root/project/backend.zip
     state: absent
 
-- name: "install package dependencies on server"
-  command: npm install 
+- name: "npm install"
+  become: true
+  command: npm install
+  args:
+    chdir: /home/ubuntu/backend
+
+- name: "npm build"
+  become: true
+  command: npm run build
   args:
     chdir: /home/ubuntu/backend
     
