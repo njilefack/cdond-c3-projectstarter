@@ -24,11 +24,12 @@
     src: /home/ubuntu/backend.zip
     dest: /home/ubuntu
     remote_src: yes
+    remove: yes
 
-- name: "delete backend.zip file from CircleCI to server"
-  ansible.builtin.unarchive:
-    path: /root/project/backend.zip
-    state: absent
+# - name: "delete backend.zip file from CircleCI to server"
+#   ansible.builtin.unarchive:
+#     path: /root/project/backend.zip
+#     state: absent
 
 - name: "npm install"
   become: true
