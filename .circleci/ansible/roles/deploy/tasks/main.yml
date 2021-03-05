@@ -41,6 +41,11 @@
   ansible.builtin.unarchive:
     path: /root/project/backend.zip
     state: absent
+
+- name: "install package dependencies on server"
+  command: npm install 
+  args:
+    chdir: /home/ubuntu/backend
     
 - name: Start PM2
   become: true

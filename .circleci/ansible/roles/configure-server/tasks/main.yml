@@ -17,8 +17,3 @@
     global: yes
     production: yes
     state: present
-
-- name: "install package dependencies"
-  command: npm install 
-  args:
-    chdir: /home/ubuntu/backend
