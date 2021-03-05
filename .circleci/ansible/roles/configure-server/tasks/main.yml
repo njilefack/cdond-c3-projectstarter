@@ -18,18 +18,6 @@
     production: yes
     state: present
 
-- name: "copy files from CircleCI to server"
-  copy:
-    src: /root/project/backend.zip
-    dest: /home/ubuntu
-
-- name: unzip backend.zp to have the backend folder
-  ansible.builtin.unarchive:
-    src: /home/ubuntu/backend.zip
-    dest: /home/ubuntu
-    remote_src: yes
-    # delete_archive: yes
-
 - name: "install package dependencies"
   command: npm install 
   args:

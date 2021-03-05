@@ -25,7 +25,22 @@
   command: npm run build
   args:
     chdir: /home/ubuntu/backend
-    
+
+- name: "copy files from CircleCI to server"
+  copy:
+    src: /root/project/backend.zip
+    dest: /home/ubuntu
+
+- name: unzip backend.zp to have the backend folder
+  ansible.builtin.unarchive:
+    src: /home/ubuntu/backend.zip
+    dest: /home/ubuntu
+    remote_src: yes
+
+- name: "delete backend.zip file from CircleCI to server"
+  ansible.builtin.unarchive:
+    path: /root/project/backend.zip
+    state: absent
     
 - name: Start PM2
   become: true
