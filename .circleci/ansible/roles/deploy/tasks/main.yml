@@ -41,14 +41,15 @@
   command: npm run build
   args:
     chdir: /home/ubuntu/backend
+
+- name: "install express"
+  become: true
+  command: npm install express --save-dev
+  args:
+    chdir: /home/ubuntu/backend
     
 - name: Start PM2
   become: true
   command: pm2 start -f ./main.js #pm2 start npm --name backend -- start
   args:
-    chdir: /home/ubuntu/backend/dist
-  environment:
-    NODE_ENV: production
-    TYPEORM_MIGRATIONS_DIR: "./migrations"
-    TYPEORM_MIGRATIONS: "./migrations/*.js"
-    TYPEORM_ENTITIES: "./modules/domain/**/*.entity.js"    
+    chdir: /home/ubuntu/backend
