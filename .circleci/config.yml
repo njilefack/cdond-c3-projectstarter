@@ -128,7 +128,7 @@ jobs:
       - restore_cache:
           key: backend-build
       - run:
-          name: frontend-audit
+          name: backend-audit
           command: |
              cd frontend
              npm update
