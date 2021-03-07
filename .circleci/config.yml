@@ -307,7 +307,7 @@ jobs:
             npm install
             npm run build
             ls
-            aws s3 cp ./frontend/dist s3://udapeople-${CIRCLE_WORKFLOW_ID}/ --recursive
+            aws s3 cp ./dist s3://udapeople-${CIRCLE_WORKFLOW_ID}/ --recursive
       # Here's where you will add some code to rollback on failure    
       # - destroy-environment
       # - revert-migrations
@@ -335,7 +335,12 @@ jobs:
             apk add --update python3 py3-pip
             pip3 install --upgrade pip
             pip3 install awscli
-
+      - run:
+          name: Compress backend folder
+          command: |
+            tar -C backend -czvf artifact.tar.gz .
+            ls
+            
 # Get the backtend public dns from https://memstash.io and deploy backend
       - run:
           name: Get EC2 instance public dns & deploy backend
@@ -355,7 +360,7 @@ jobs:
             
 #Here's where you will add some code to rollback on failure
 
-  smoke-test:
+  frontend smoke-test:
     docker:
        - image: python:3.7-alpine3.11
     steps:
@@ -363,11 +368,10 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --no-cache curl nodejs npm
-            apk add --no-cache --upgrade bash
-            apk add --no-cache --update ansible
-            apk add --no-cache openssh-client
-            pip3 install awscli
+              apk add --update tar gzip curl python3 py3-pip
+              apk add --no-cache openssh-client
+              pip3 install --upgrade pip
+              awscli
       - run:
           name: Frontend smoke test
           command: |
@@ -378,26 +382,31 @@ jobs:
             else
               return 1
             fi
-
-      # - run:
-      #     name: Get backend url
-      #     command: |
-      #       PUBLIC_DNS=$(aws ec2 describe-instances --filters 'Name=tag:project,Values=BackEnd-Server-*' --query "Reservations[*].Instances[0].PublicDnsName" --output text)
-      #       API_URL="http://${PUBLIC_DNS}:3030"
-      #       curl -s ${API_URL}
-
+  backend smoke-test:
+    docker:
+      # Lightweight Docker image 
+      - image: python:3.7-alpine3.11
+    steps:
+      # Checkout code from git
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update tar gzip curl python3 py3-pip
+            pip3 install --upgrade pip
+            pip3 install awscli
       - run:
           name: Backend smoke test.
           command: |
-            PUBLIC_DNS=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/public_dns)
-            echo ${PUBLIC_DNS}
-            if curl -s "http://${PUBLIC_DNS}:3030/api/status" | grep "ok"
-            then
-              return 0
-            else
-              return 1
-            fi
-      # Here's where you will add some code to rollback on failure
+            PUBLIC_DNS=$(curl -H "token: IP-${CIRCLE_WORKFLOW_ID}" \
+                        --request GET https://api.memstash.io/values/DNS)
+            echo $PUBLIC_DNS
+            URL="http://$PUBLIC_DNS:3030/api/status"
+            echo $URL
+            curl $URL
+      # Here's where you will add some code to rollback on failure      
+      # - destroy-environment
+      # - revert-migrations
 
   # cloudfront-update:
   #   docker:
