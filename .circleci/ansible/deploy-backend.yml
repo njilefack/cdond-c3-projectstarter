@@ -12,8 +12,7 @@
     ansible_python_interpreter: /usr/bin/python3
     host_key_checking: False
     ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
-# Get the environment variables from CircleCI and add to the instance
-    NODE_ENV: production
+    ENVIRONMENT: production
     CIRCLE_WORKFLOW_ID: "{{ lookup('env','CIRCLE_WORKFLOW_ID') }}"
     TYPEORM_MIGRATIONS: "{{ lookup('env','TYPEORM_MIGRATIONS') }}"
     TYPEORM_ENTITIES: "{{ lookup('env','TYPEORM_ENTITIES') }}"
@@ -23,7 +22,7 @@
     TYPEORM_USERNAME: "{{ lookup('env','TYPEORM_USERNAME') }}"
     TYPEORM_PASSWORD: "{{ lookup('env','TYPEORM_PASSWORD') }}"
     TYPEORM_DATABASE: "{{ lookup('env','TYPEORM_DATABASE') }}"
-    ENVIRONMENT: "{{ lookup('env','ENVIRONMENT') }}"
+    #ENVIRONMENT: "{{ lookup('env','ENVIRONMENT') }}"
     #API_URL: "{{ lookup('env','API_URL') }}"
 
     gather_facts: true
