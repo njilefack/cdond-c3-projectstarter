@@ -3,7 +3,7 @@
   apt:
     upgrade: "yes"
     
-- name: "install pm2"
+- name: "install pm2 by npm"
   become: true
   npm:
     name: pm2
