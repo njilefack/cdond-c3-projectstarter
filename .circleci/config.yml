@@ -67,7 +67,6 @@ jobs:
           name: Back-end build
           command: |
              cd backend
-             npm install
              npm run build
              cd dist
              ls
@@ -181,11 +180,11 @@ jobs:
                --data ${PUBLIC_DNS} \
                https://api.memstash.io/values/public_dns
 
-      # - persist_to_workspace:
-      #     root: ~/
-      #     paths:
-      #       - cdond-c3-projectstarter/.circleci/ansible/inventory.txt
-      # Here's where you will add some code to rollback on failure
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project/.circleci/ansible/inventory.txt
+# Here's where you will add some code to rollback on failure
 
   configure-infrastructure:
     docker:
@@ -194,7 +193,12 @@ jobs:
       - checkout
       - add_ssh_keys:
           fingerprints: ["d8:6b:09:ec:73:91:88:72:ef:18:3e:44:bd:50:73:de"]
-      # attach workspace
+
+      # attach workspace          
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project/.circleci/ansible/inventory.txt
       - run:
           name: Install dependencies
           command: |
@@ -231,6 +235,7 @@ jobs:
           command: |
             cd backend
             npm install
+            npm run build
             npm run migrations:revert
             npm run migrations > migrations.txt
           no_output_timeout: 15m
@@ -259,6 +264,14 @@ jobs:
             apk add --no-cache --update npm
             pip3 install awscli
 
+      - run:
+          name: Build front-end before to have the backend url moved to front-end
+          command: |
+            cd frontend
+            npm run build
+            cd dist
+            ls
+
 # Get the backend URL
       - run:
           name: Get backend url
@@ -285,7 +298,14 @@ jobs:
 
     steps:
       - checkout
+      # Add ssh keys with fingerprint
+      - add_ssh_keys:
+          fingerprints: ["d8:6b:09:ec:73:91:88:72:ef:18:3e:44:bd:50:73:de"]
       # attach workspace
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project/.circleci/ansible/inventory.txt 
       - run:
           name: Install dependencies
           no_output_timeout: 15m
@@ -306,9 +326,6 @@ jobs:
             cd .circleci/ansible/
             echo ${PUBLIC_DNS} >> ./inventory.txt
             cat ./inventory.txt
-# Add ssh keys with fingerprint
-      - add_ssh_keys:
-          fingerprints: ["d8:6b:09:ec:73:91:88:72:ef:18:3e:44:bd:50:73:de"]
       - run:
           name: Configure backend server using ansible and then deploy backend
           command: |

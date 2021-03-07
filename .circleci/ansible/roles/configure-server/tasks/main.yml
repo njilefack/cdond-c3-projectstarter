@@ -2,13 +2,6 @@
   become: true
   apt:
     upgrade: "yes"
-
-- name: "install dependencies."
-  become: true
-  apt:
-    name: ["nodejs", "npm", "zip"]
-    state: latest
-    update_cache: yes
     
 - name: "install pm2"
   become: true
@@ -17,3 +10,21 @@
     global: yes
     production: yes
     state: present
+
+- name: "copy files from CircleCI to server"
+  copy:
+    src: /root/project/dist.zip
+    dest: /home/ubuntu
+
+- name: unzip dist.zp to have the backend folder
+  ansible.builtin.unarchive:
+    src: /home/ubuntu/dist.zip
+    dest: /home/ubuntu
+    remote_src: yes
+
+- name: "install dependencies."
+  become: true
+  apt:
+    name: ["nodejs", "npm", "zip"]
+    state: latest
+    update_cache: yes

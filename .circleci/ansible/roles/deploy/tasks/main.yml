@@ -1,52 +1,47 @@
----
-- name: "install dependencies."
-  become: true
-  apt:
-    name: ["nodejs", "npm"]
-    state: latest
-    update_cache: yes
+# ---
+# - name: "install dependencies."
+#   become: true
+#   apt:
+#     name: ["nodejs", "npm"]
+#     state: latest
+#     update_cache: yes
 
-- name: "install pm2"
-  become: true
-  npm:
-    name: pm2
-    global: yes
-    production: yes
-    state: present
+# - name: "install pm2"
+#   become: true
+#   npm:
+#     name: pm2
+#     global: yes
+#     production: yes
+#     state: present
 
 - name: "copy files from CircleCI to server"
   copy:
-    src: /root/project/backend.zip
+    src: /root/project/backend/dist.zip
     dest: /home/ubuntu
 
-- name: unzip backend.zp to have the backend folder
+- name: unzip dist.zp to have the backend folder
   ansible.builtin.unarchive:
-    src: /home/ubuntu/backend.zip
+    src: /home/ubuntu/dist.zip
     dest: /home/ubuntu
     remote_src: yes
 
-# - name: "delete backend.zip file from CircleCI to server"
-#   ansible.builtin.unarchive:
-#     path: /root/project/backend.zip
-#     state: absent
+# - name: "npm install"
+#   become: true
+#   command: npm install
+#   args:
+#     chdir: /home/ubuntu/backend
 
-- name: "npm install"
-  become: true
-  command: npm install
-  args:
-    chdir: /home/ubuntu/backend
+# - name: "npm build"
+#   become: true
+#   command: npm run build
+#   args:
+#     chdir: /home/ubuntu/backend
 
-- name: "npm build"
-  become: true
-  command: npm run build
-  args:
-    chdir: /home/ubuntu/backend
-
-- name: "install express"
-  become: true
-  command: npm install express --save-dev
-  args:
-    chdir: /home/ubuntu/backend
+# - name: "install express"
+#   become: true
+#   command: npm install express --save-dev
+#   args:
+#     chdir: /home/ubuntu/backend
     
 - name: Start PM2
   become: true
