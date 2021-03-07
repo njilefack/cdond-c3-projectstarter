@@ -38,7 +38,7 @@
 
 - name: "npm build"
   become: true
-  command: npm run build
+  command: npm run build:staging
   args:
     chdir: /home/ubuntu/backend
 
@@ -50,6 +50,6 @@
     
 - name: Start PM2
   become: true
-  command: pm2 start -f ./main.js #pm2 start npm --name backend -- start
+  command: pm2 start npm --name backend -- start
   args:
-    chdir: /home/ubuntu/backend/src
+    chdir: /home/ubuntu/backend

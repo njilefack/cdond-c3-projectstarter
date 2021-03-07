@@ -106,6 +106,7 @@
     "collectCoverageFrom": [
       "src/**/*.ts",
       "!src/migrations/**/*.ts",
+      "!src/modules/domain/**/*.entity.ts",
       "!src/modules/config/**/*.ts",
       "!src/modules/app/**/*.ts",
       "!src/modules/auth/**/*.ts",
