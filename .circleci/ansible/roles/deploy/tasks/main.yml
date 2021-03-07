@@ -66,6 +66,7 @@
   copy:
     src: /root/project/artifact.tar.gz
     dest: /home/ubuntu/backend/artifact.tar.gz
+    remote_src: yes
 
 - name: Uncompress Backend
   shell: |

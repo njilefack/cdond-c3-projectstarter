@@ -276,24 +276,19 @@ jobs:
 # frontend deployment
   deploy-frontend:
     docker:
-      - image: python:3.7-alpine3.11
+      - image: amazon/aws-cli
     steps:
       - checkout
       - run:
           name: Install dependencies
           command: |
-            apk add --no-cache curl
-            apk add --no-cache --upgrade bash
-            apk add --no-cache --update npm
-            pip3 install awscli
-
-      - run:
-          name: Build front-end before to have the backend url moved to front-end
-          command: |
-            cd frontend
-            npm run build
-            cd dist
-            ls
+              yum -y install tar gzip
+              curl -sL https://rpm.nodesource.com/setup_lts.x | bash -
+              yum -y install nodejs
+            # apk add --no-cache curl
+            # apk add --no-cache --upgrade bash
+            # apk add --no-cache --update npm
+            # pip3 install awscli
 
 # Get the backend URL
       - run:
@@ -304,13 +299,16 @@ jobs:
             export API_URL="http://${PUBLIC_DNS}:3030"
             echo "API_URL=$API_URL" >> frontend/.env
             echo "${API_URL}"
-            cd frontend
-            npm install
-            npm run build
+
       - run:
           name: Deploy frontend objects to s3 bucket
           command: |
+            cd frontend
+            npm install
+            npm run build
+            ls
             aws s3 cp ./frontend/dist s3://udapeople-${CIRCLE_WORKFLOW_ID}/ --recursive
+      # Here's where you will add some code to rollback on failure    
       # - destroy-environment
       # - revert-migrations
 
