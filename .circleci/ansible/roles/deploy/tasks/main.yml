@@ -14,16 +14,16 @@
 #     production: yes
 #     state: present
 
-- name: "copy files from CircleCI to server"
-  copy:
-    src: /root/project/backend/dist.zip
-    dest: /home/ubuntu
+# - name: "copy files from CircleCI to server"
+#   copy:
+#     src: /root/project/backend/dist.zip
+#     dest: /home/ubuntu
 
-- name: unzip dist.zp to have the backend folder
-  ansible.builtin.unarchive:
-    src: /home/ubuntu/dist.zip
-    dest: /home/ubuntu
-    remote_src: yes
+# - name: unzip dist.zp to have the backend folder
+#   ansible.builtin.unarchive:
+#     src: /home/ubuntu/dist.zip
+#     dest: /home/ubuntu
+#     remote_src: yes
 
 # - name: "npm install"
 #   become: true
@@ -43,8 +43,50 @@
 #   args:
 #     chdir: /home/ubuntu/backend
     
-- name: Start PM2
+# - name: Start PM2
+#   become: true
+#   command: pm2 start npm --name backend -- start
+#   args:
+#     chdir: /home/ubuntu/backend
+
+################################
+# NEW CODE                     #                                            
+################################
+
+---
+- name: Creates backend directory
+  file:
+    path: /home/ubuntu/backend
+    state: directory
+
+- name: Print the current directory
+  shell: pwd
+
+- name: Copy backend dist files web server
+  copy:
+    src: /root/project/artifact.tar.gz
+    dest: /home/ubuntu/backend/artifact.tar.gz
+
+- name: Uncompress Backend
+  shell: |
+    cd /home/ubuntu/backend
+    tar xvzf artifact.tar.gz -C .
+    ls -la
+    
+- name: Build
   become: true
-  command: pm2 start npm --name backend -- start
+  shell: |
+    cd /home/ubuntu/backend
+    npm install
+    npm run build
+- name: "initialize pm2"
+  become: yes
+  shell: pm2 ls
+  args:
+    chdir: /home/ubuntu/backend
+
+- name: "start pm2"
+  become: yes
+  shell: pm2 start --name "backend" npm -- start
   args:
     chdir: /home/ubuntu/backend

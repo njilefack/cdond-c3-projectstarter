@@ -140,6 +140,7 @@ jobs:
         command: 
     steps:
       - checkout
+      - run: yum install -y tar gzip curl
       - run:
           name: Ensure back-end infrastructure exists
           command: |
@@ -181,10 +182,10 @@ jobs:
                --data ${PUBLIC_DNS} \
                https://api.memstash.io/values/public_dns
 
-      # - persist_to_workspace:
-      #     root: ~/
-      #     paths:
-      #       - project/.circleci/ansible/inventory.txt
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project/.circleci/ansible/inventory.txt
 # Here's where you will add some code to rollback on failure
 
   configure-infrastructure:
@@ -196,30 +197,51 @@ jobs:
           fingerprints: ["d8:6b:09:ec:73:91:88:72:ef:18:3e:44:bd:50:73:de"]
 
       # attach workspace          
-      # - persist_to_workspace:
-      #     root: ~/
-      #     paths:
-      #       - project/.circleci/ansible/inventory.txt
+      - attach_workspace:
+          at: ~/
+      - run: cat .circleci/ansible/inventory.txt
       - run:
           name: Install dependencies
           command: |
-            apk add --update tar gzip ansible nodejs npm curl
-            apk add --no-cache --upgrade bash
-            apk add --no-cache --update ansible
-            apk add --no-cache openssh-client
-            pip3 install awscli
-    
+            apk add tar gzip curl
+            apk add ansible
+            pip install awscli
       - run:
-          name: Get the public DNS of EC2 instance from https://memstash.io/ & Configure server
+          name: Configure server
           command: |
-            PUBLIC_DNS=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/public_dns)
-            echo ${PUBLIC_DNS}
-            cd .circleci/ansible/
-            ls
-            echo ${PUBLIC_DNS} >> ./inventory.txt
-            cat ./inventory.txt    
-            export ANSIBLE_HOST_KEY_CHECKING=False
-            ansible-playbook -i ./inventory.txt configure-server.yml
+            touch ~/project/backend/.env
+            echo ENVIRONMENT=production >> "backend/.env"
+            echo TYPEORM_CONNECTION=$TYPEORM_CONNECTION >> "backend/.env"
+            echo TYPEORM_MIGRATIONS_DIR=$TYPEORM_MIGRATIONS_DIR >> "backend/.env"
+            echo TYPEORM_ENTITIES=$TYPEORM_ENTITIES >> "backend/.env"
+            echo TYPEORM_MIGRATIONS=$TYPEORM_MIGRATIONS >> "backend/.env"
+            echo TYPEORM_HOST=$TYPEORM_HOST >> "backend/.env"
+            echo TYPEORM_PORT=$TYPEORM_PORT >> "backend/.env"
+            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> "backend/.env"
+            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "backend/.env"
+            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env"
+            cat backend/.env
+            ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
+      # - run:
+      #     name: Install dependencies
+      #     command: |
+      #       apk add --update tar gzip ansible nodejs npm curl
+      #       apk add --no-cache --upgrade bash
+      #       apk add --no-cache --update ansible
+      #       apk add --no-cache openssh-client
+      #       pip3 install awscli
+    
+      # - run:
+      #     name: Get the public DNS of EC2 instance from https://memstash.io/ & Configure server
+      #     command: |
+      #       PUBLIC_DNS=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/public_dns)
+      #       echo ${PUBLIC_DNS}
+      #       cd .circleci/ansible/
+      #       ls
+      #       echo ${PUBLIC_DNS} >> ./inventory.txt
+      #       cat ./inventory.txt    
+      #       export ANSIBLE_HOST_KEY_CHECKING=False
+      #       ansible-playbook -i ./inventory.txt configure-server.yml
 
 #Here's where you will add some code to rollback on failure -destroy-environment
 
@@ -303,18 +325,17 @@ jobs:
       - add_ssh_keys:
           fingerprints: ["d8:6b:09:ec:73:91:88:72:ef:18:3e:44:bd:50:73:de"]
       # attach workspace
-      # - persist_to_workspace:
-      #     root: ~/
-      #     paths:
-      #       - project/.circleci/ansible/inventory.txt 
+      - attach_workspace:
+          at: ~/
       - run:
           name: Install dependencies
           no_output_timeout: 15m
           command: |
-            apk add --no-cache curl
-            apk add --no-cache --upgrade bash
-            apk add --no-cache --update ansible
-            apk add --no-cache openssh-client
+            apk add --update ansible
+            apk add --update tar gzip curl
+            apk add --update openssh-client
+            apk add --update python3 py3-pip
+            pip3 install --upgrade pip
             pip3 install awscli
 
 # Get the backtend public dns from https://memstash.io and deploy backend
@@ -330,16 +351,6 @@ jobs:
       - run:
           name: Configure backend server using ansible and then deploy backend
           command: |
-            echo ENVIRONMENT=production >> "backend/.env"
-            echo TYPEORM_CONNECTION=postgres >> "backend/.env"
-            echo TYPEORM_MIGRATIONS_DIR=./src/migrations >> "backend/.env"
-            echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> "backend/.env"
-            echo TYPEORM_MIGRATIONS=./src/migrations/*.ts >> "backend/.env"
-            echo TYPEORM_HOST=$TYPEORM_HOST >> "backend/.env"
-            echo TYPEORM_PORT=$TYPEORM_PORT >> "backend/.env"
-            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> "backend/.env"
-            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "backend/.env"
-            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env"
             cd .circleci/ansible/
             export ANSIBLE_HOST_KEY_CHECKING=False
             ansible-playbook -i ./inventory.txt deploy-backend.yml
