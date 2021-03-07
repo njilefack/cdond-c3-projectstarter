@@ -338,7 +338,7 @@ jobs:
       - run:
           name: Compress backend folder
           command: |
-            tar -C backend -czvf artifact.tar.gz .
+            tar -C backend -czvf ~/artifact.tar.gz 
             ls
 
 # Get the backtend public dns from https://memstash.io and deploy backend
