@@ -137,6 +137,7 @@ jobs:
   deploy-infrastructure:
     docker:
       - image: amazon/aws-cli
+        command: 
     steps:
       - checkout
       - run:
@@ -180,10 +181,10 @@ jobs:
                --data ${PUBLIC_DNS} \
                https://api.memstash.io/values/public_dns
 
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - project/.circleci/ansible/inventory.txt
+      # - persist_to_workspace:
+      #     root: ~/
+      #     paths:
+      #       - project/.circleci/ansible/inventory.txt
 # Here's where you will add some code to rollback on failure
 
   configure-infrastructure:
@@ -195,10 +196,10 @@ jobs:
           fingerprints: ["d8:6b:09:ec:73:91:88:72:ef:18:3e:44:bd:50:73:de"]
 
       # attach workspace          
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - project/.circleci/ansible/inventory.txt
+      # - persist_to_workspace:
+      #     root: ~/
+      #     paths:
+      #       - project/.circleci/ansible/inventory.txt
       - run:
           name: Install dependencies
           command: |
@@ -302,10 +303,10 @@ jobs:
       - add_ssh_keys:
           fingerprints: ["d8:6b:09:ec:73:91:88:72:ef:18:3e:44:bd:50:73:de"]
       # attach workspace
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - project/.circleci/ansible/inventory.txt 
+      # - persist_to_workspace:
+      #     root: ~/
+      #     paths:
+      #       - project/.circleci/ansible/inventory.txt 
       - run:
           name: Install dependencies
           no_output_timeout: 15m
