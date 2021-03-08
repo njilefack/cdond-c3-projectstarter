@@ -62,8 +62,8 @@
 - name: Print the current directory
   shell: pwd
 
-- name: Compress backend folder to backend.tar.gz
-  community.general.archive:
+- name: "Compress backend folder to backend.tar.gz"
+- archive:
     path: /root/project/backend
     dest: /root/project/artifact.tar.gz
     format: gz
