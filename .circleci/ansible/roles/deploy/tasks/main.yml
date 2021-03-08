@@ -62,18 +62,11 @@
 - name: Print the current directory
   shell: pwd
 
-- name: "Compress backend folder to backend.tar.gz"
-- archive:
-    path: /root/project/backend
-    dest: /root/project/artifact.tar.gz
-    format: gz
-    force_archive: true
-
 - name: Copy backend dist files web server
-  copy:
+  ansible.builtin.copy:
     src: /root/project/artifact.tar.gz
     dest: /home/ubuntu/backend/artifact.tar.gz
-    remote_src: yes
+    remote_src: false
 
 - name: Uncompress Backend
   shell: |

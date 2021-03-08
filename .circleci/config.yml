@@ -335,11 +335,11 @@ jobs:
             apk add --update python3 py3-pip
             pip3 install --upgrade pip
             pip3 install awscli
-      # - run:
-      #     name: Compress backend folder
-      #     command: |
-      #       tar -C backend -czvf artifact.tar.gz .
-      #       ls -la
+      - run:
+          name: Compress backend folder
+          command: |
+            tar -C backend -czvf artifact.tar.gz .
+            ls -la
 
 # Get the backtend public dns from https://memstash.io and deploy backend
       - run:
