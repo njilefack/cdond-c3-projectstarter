@@ -371,7 +371,7 @@ jobs:
               apk add --update tar gzip curl python3 py3-pip
               apk add --no-cache openssh-client
               pip3 install --upgrade pip
-              awscli
+              pip3 install awscli
       - run:
           name: Frontend smoke test
           command: |
@@ -398,7 +398,7 @@ jobs:
       - run:
           name: Backend smoke test.
           command: |
-            PUBLIC_DNS=$(curl -H "token: IP-${CIRCLE_WORKFLOW_ID}" \
+            PUBLIC_DNS=$(curl -H "token: DNS-${CIRCLE_WORKFLOW_ID}" \
                         --request GET https://api.memstash.io/values/DNS)
             echo $PUBLIC_DNS
             URL="http://$PUBLIC_DNS:3030/api/status"
