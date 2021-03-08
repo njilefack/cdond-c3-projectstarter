@@ -64,7 +64,7 @@
 
 - name: Copy backend dist files web server
   copy:
-    src: /root/artifact.tar.gz
+    src: ./artifact.tar.gz
     dest: /home/ubuntu/backend/artifact.tar.gz
     remote_src: yes
 
