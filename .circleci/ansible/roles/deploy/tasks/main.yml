@@ -78,7 +78,7 @@
   become: true
   shell: |
     cd /home/ubuntu/backend
-    npm install
+    # npm install
     npm run build
 - name: "initialize pm2"
   become: yes
