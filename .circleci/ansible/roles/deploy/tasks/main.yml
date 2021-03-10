@@ -54,6 +54,45 @@
 ################################
 
 ---
+- name: "update apt packages."
+  become: yes
+  apt:
+    update_cache: yes
+    
+- name: "upgrade packages"
+  become: yes
+  apt:
+    upgrade: yes
+    
+- name: "install dependencies."
+  become: yes
+  apt:
+    name: ["nodejs", "npm"]
+    state: latest
+    update_cache: yes
+    
+- name: "install pm2"
+  become: yes
+  npm:
+    name: pm2
+    global: yes
+    production: yes
+    state: present
+    
+- name: "install typescript"
+  become: yes
+  npm:
+    name: typescript
+    global: yes
+    production: yes
+    state: present
+    
+- name: " update dependancies"
+  become: true
+  shell: |
+    curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+    apt-get install -y nodejs  
+    npm install --save glob
 - name: Creates backend directory
   file:
     path: /home/ubuntu/backend
@@ -81,11 +120,13 @@
     dest: /home/ubuntu/
     owner: ubuntu
     
-# - name: Build
-#   become: true
-#   shell: |
-#     cd /home/ubuntu/backend
-#     npm run build
+- name: Build
+  become: true
+  shell: |
+    cd /home/ubuntu/backend
+    npm install
+    npm fund
+    npm run build
 
 - name: "initialize pm2"
   become: yes
