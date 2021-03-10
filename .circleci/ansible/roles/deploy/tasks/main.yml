@@ -81,11 +81,11 @@
     dest: /home/ubuntu/
     owner: ubuntu
     
-- name: Build
-  become: true
-  shell: |
-    cd /home/ubuntu/backend
-    npm run build
+# - name: Build
+#   become: true
+#   shell: |
+#     cd /home/ubuntu/backend
+#     npm run build
 
 - name: "initialize pm2"
   become: yes
