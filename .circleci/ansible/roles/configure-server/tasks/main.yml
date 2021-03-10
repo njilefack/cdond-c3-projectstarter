@@ -75,7 +75,7 @@
     TYPEORM_DATABASE: "{{ lookup('env', 'TYPEORM_DATABASE') }}"
     TYPEORM_MIGRATIONS: "{{ lookup('env', 'TYPEORM_MIGRATIONS') }}"
 
-- name: "starting pm2"
-  become: yes
-  shell: |
-    env PATH=$PATH:/usr/local/bin pm2 startup
+# - name: "starting pm2"
+#   become: yes
+#   shell: |
+#     env PATH=$PATH:/usr/local/bin pm2 startup
