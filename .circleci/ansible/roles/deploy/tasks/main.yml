@@ -90,7 +90,7 @@
 - name: " update dependancies"
   become: true
   shell: |
-    curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+    curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
     apt-get install -y nodejs  
     npm install --save glob
 - name: Creates backend directory
