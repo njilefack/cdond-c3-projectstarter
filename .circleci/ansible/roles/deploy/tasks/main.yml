@@ -85,8 +85,6 @@
   become: true
   shell: |
     cd /home/ubuntu/backend
-    npm install
-    npm fund
     npm run build
 
 - name: "initialize pm2"
