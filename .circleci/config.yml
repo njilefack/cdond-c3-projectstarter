@@ -420,12 +420,14 @@ jobs:
       - run:
           name: Backend smoke test.
           command: |
-            PUBLIC_DNS=$(curl -H "token: DNS-${CIRCLE_WORKFLOW_ID}" \
-                        --request GET https://api.memstash.io/values/DNS)
-            echo $PUBLIC_DNS
-            URL="http://$PUBLIC_DNS:3030/api/status"
-            echo $URL
-            curl $URL
+            PUBLIC_DNS=$(curl -H "token: ${CIRCLE_WORKFLOW_ID}" --request GET https://api.memstash.io/values/public_dns)
+            echo ${PUBLIC_DNS}
+            if curl -s "http://${PUBLIC_DNS}:3030/api/status" | grep "ok"
+            then
+              return 0
+            else
+              return 1
+            fi
       # Here's where you will add some code to rollback on failure      
       # - destroy-environment
       # - revert-migrations

@@ -11,7 +11,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupName: !Sub UdaPeople-${ID}
-      GroupDescription: Allow port 22, port 3030 and port 5432.
+      GroupDescription: Allow port 22, port 3030 (node.js), port 5432 (po).
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 22
@@ -24,6 +24,18 @@ Resources:
         - IpProtocol: tcp
           FromPort: 5432
           ToPort: 5432
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 9090
+          ToPort: 9090
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 9093
+          ToPort: 9093
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 9100
+          ToPort: 9100
           CidrIp: 0.0.0.0/0
 
   EC2Instance:
@@ -39,3 +51,10 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub backend-${ID}
+
+# Outputs:
+#   PublicDnsName:
+#     Description: Server Public DNS Name
+#     Value: !GetAtt EC2Instance.PublicDnsName
+#     Export:
+#       Name: !Sub "${AWS::StackName}-BackendPublicDnsName"
